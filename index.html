@@ -1,40 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>COPAGAZ | Gás e Água</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="img/logo.png" type="image/x-icon">
 </head>
-<link rel="shortcut icon" href="img/logo.png" type="image/x-icon">
-<header>
-    <div class="header">
-        <div class="logo">
-            <img src="img/logo.png" alt="Logo">
-            <div class="logo-text">
-                <h1>COPAGAZ</h1>
-            </div>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="#banner">Início</a></li>
-                <li><a href="#produtos">Produtos</a></li>
-                <li><a href="adm.html">ADM</a></li>
-                <li><a href="#"><img src="img/telephone.png" alt="Ícone de telefone azul em estilo minimalista, mostrando um aparelho de telefone antigo com fio, em um fundo escuro e simples. O objeto está centralizado e destaca-se por contraste, com uma aparência limpa e profissional. O ambiente é neutro e minimalista, sem elementos distrativos. Título visual do ícone: nenhum texto. Tom emocional: simples, confiável e funcional." srcset="img"></a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
 <body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <img src="img/logo.png" alt="Logo COPAGAZ">
 
+                <div class="logo-text">
+                    <h1>COPAGAZ</h1>
+                </div>
+            </div>
 
-    Esse aq para computador, trocar paraa o img/2.img quando for para celular ou tablet.
+            <nav>
+                <ul>
+                    <li><a href="#banner">Início</a></li>
+                    <li><a href="#produtos">Produtos</a></li>
+                    <li><a href="adm.html">ADM</a></li>
+                    <li>
+                        <a href="https://wa.me/55999373062" aria-label="Telefone">
+                            <img src="img/telephone.png" alt="Telefone">
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
     <div class="bannerbaixe">
         <div class="banner" id="banner">
             <img src="img/1.png" alt="Banner">
             </div>
-            <div class ="banner-text">
-                <h1>Baixe o aplicativo</h1>
+             <div class="banner-text">
+            <!-- Coloque o arquivo do aplicativo em: app/copagaz.apk -->
+            <a class="btn-baixe" href="app/copagaz.apk" download>
+                Baixe o aplicativo
+            </a>
         </div>
     </div>
 
@@ -59,7 +67,7 @@
 
 
     <div class="Gas">
-        <img src="img/2.png" alt="Gás de cozinha">
+        <img src="img/4.png" alt="Gás de cozinha">
         <h2>Gás de cozinha</h2>
         <div class="preco">
             <p>R$ xxx,xx</p>
@@ -72,47 +80,87 @@
 
     <div class="Carrinho">
         <h1>CARRINHO</h1>
-        parte do carrinho, que precisa do js para fazer o calculo certinho de quando aprter no botao adicionar ao carrinho, ele vai somar o valor do produto e colocar no carrinho, e quando apertar no botao finalizar compra, ele vai mostrar o valor total da compra. e direcionar o pedido para o whatsapp do vendedor, e quando apertar no botao limpar carrinho, ele vai zerar o valor do carrinho.
-        e todo produto bai ter a opção de remover do carrinho, e quando apertar no botao remover do carrinho, ele vai subtrair o valor do produto do carrinho.
     </div>
+</div>
 
+<footer>
+    <div class="footer">
 
-    <footer>
-        <div class="footer">
-            <div class="navegação">
-                <ul>
-                    <li><a href="#">Início</a></li>
-                    <li><a href="#">Produtos</a></li>
-                    <li><a href="#">Contato</a></li>
-                </ul>
-            </div>
+        <!-- Navegação -->
+        <div class="navegação">
+            <h3>Navegação</h3>
 
-            <div class="meiofooter">
-                <div class="logofooter">
-                <img src="img/logo.png" alt="Logo">
+            <ul>
+                <li><a href="#banner">Início</a></li>
+                <li><a href="#produtos">Produtos</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </div>
+
+        <!-- Logo e informações -->
+        <div class="meiofooter">
+
+            <div class="logofooter">
+                <img src="img/logo.png" alt="Logo COPAGAZ">
+
                 <div class="logofootertext">
                     <h1>COPAGAZ</h1>
 
                     <div class="footer-text1">
-                        <p>Seu gás de confiança e sua água fresquinha? É na Copagaz!</p>
+                        <p>
+                            Seu gás de confiança e sua água fresquinha?
+                            É na Copagaz!
+                        </p>
                     </div>
+
                     <div class="footer-text2">
-                        <p>© 2024 COPAGAZ. Todos os direitos reservados.</p>
+                        <p>
+                            © 2024 COPAGAZ. Todos os direitos reservados.
+                        </p>
                     </div>
-                </div>
-                </div>
-
-                <div class="desenvolvedora">
-
-                    <h1 class="desenvolvedora-title">Desenvolvedora</h1>
-                    <h2 class="desenvolvedora-name">Melissa Rossa Pereira</h2>
-                    <p class="desenvolvedora-description">Para entrar em contato:</p>
-                  <li><a href="https://api.whatsapp.com/send?phone=5511999999999" target="_blank"><img src="img/whatsapp.png" alt="WhatsApp"></a></li>
-                  <li><a href="https://www.instagram.com/" target="_blank"><img src="img/instagram.png" alt="Instagram"></a></li>
-                  <li><a href="https://github.com/" target="_blank"><img src="img/github.png" alt="GitHub"></a></li>
                 </div>
             </div>
-            </footer>
 
+        </div>
+
+        <!-- Desenvolvedora -->
+        <div class="footer-dev">
+
+            <h3>Desenvolvedora</h3>
+
+            <p>
+                Este site foi desenvolvido por
+                <strong>Melissa Rossa Pereira</strong>.
+            </p>
+
+            <p class="dev-texto">
+                Para entrar em contato comigo:
+            </p>
+
+            <div class="redes-footer">
+
+                <a href="https://github.com/Melissa-RossaP" target="_blank">
+                    <img src="img/github.png" alt="GitHub">
+                    GitHub
+                </a>
+
+                <a href="https://wa.me/5542999106956" target="_blank">
+                    <img src="img/whatsapp.png" alt="WhatsApp">
+                    WhatsApp
+                </a>
+
+                <a href="https://instagram.com/m3l.r1" target="_blank">
+                    <img src="img/instagram.png" alt="Instagram">
+                    Instagram
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+</footer>
+
+<script src="main.js"></script>
 </body>
 </html>

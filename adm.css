@@ -1,0 +1,197 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* LOGIN */
+.login-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.login-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-logo img {
+    width: 80px;
+    margin-bottom: 10px;
+}
+
+.login-box h1 {
+    color: #022047;
+    margin-bottom: 5px;
+}
+
+.login-field {
+    text-align: left;
+    margin-top: 15px;
+}
+
+.login-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #c22400;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.login-error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* HEADER ADM */
+.header {
+    background-color: #022047;
+    color: white;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo img {
+    height: 40px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* PAINEL PRODUTOS */
+.painel {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.painel h1 {
+    color: #022047;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.produtos-adm-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.card-adm {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+    min-width: 300px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.card-adm h2 {
+    color: #c22400;
+    margin-bottom: 15px;
+}
+
+.campo-adm {
+    margin-bottom: 15px;
+}
+
+.campo-adm label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #666;
+}
+
+.valor-atual {
+    font-weight: bold;
+    color: #022047;
+    margin-bottom: 5px;
+}
+
+.card-adm input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.card-adm img {
+    height: 100px;
+    display: block;
+    margin: 15px auto;
+}
+
+.Salvar button {
+    width: 100%;
+    padding: 12px;
+    background-color: #022047;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.Salvar button:hover {
+    background-color: #01142e;
+}
+
+footer {
+    margin-top: auto;
+    background-color: #022047;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
