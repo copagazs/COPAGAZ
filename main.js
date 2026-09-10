@@ -261,3 +261,47 @@ function atualizarProduto(id, dados, atualizarCarrinho = true) {
         atualizarInterface();
     }
 }
+
+let installPrompt = null;
+
+const btnInstalar = document.getElementById("btn-instalar");
+
+// Quando o navegador permitir a instalação
+window.addEventListener("beforeinstallprompt", (event) => {
+
+    event.preventDefault();
+
+    installPrompt = event;
+
+    btnInstalar.hidden = false;
+});
+
+// Quando clicar em "Baixe o aplicativo"
+btnInstalar.addEventListener("click", async () => {
+
+    if (!installPrompt) {
+        alert(
+            "Para instalar o COPAGAZ, use o menu do navegador e escolha 'Instalar aplicativo'."
+        );
+        return;
+    }
+
+    installPrompt.prompt();
+
+    const resultado = await installPrompt.userChoice;
+
+    if (resultado.outcome === "accepted") {
+        console.log("COPAGAZ instalado!");
+    } else {
+        console.log("Instalação cancelada.");
+    }
+
+    // Permite que um novo evento de instalação
+    // seja recebido posteriormente.
+    installPrompt = null;
+});
+
+// Quando o aplicativo for instalado
+window.addEventListener("appinstalled", () => {
+    console.log("COPAGAZ instalado!");
+});

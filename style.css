@@ -841,7 +841,7 @@ footer {
 
     /* Troca automaticamente o banner para a versão mobile */
     .banner img {
-        content: url("img/2.png");
+        content: url("img/1.png");
         height: 205px;
         min-height: 0;
         object-fit: cover;
