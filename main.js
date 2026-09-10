@@ -2,8 +2,8 @@
 const TAXA_ENTREGA = 20.00;
 
 const produtos = {
-    agua: { id: "agua", nome: "Água Mineral", preco: 0 },
-    gas: { id: "gas", nome: "Gás de cozinha", preco: 0 }
+    agua: { id: "agua", nome: "Água Mineral", preco: 100.00 },
+    gas: { id: "gas", nome: "Gás de cozinha", preco: 120.00 }
 };
 
 let carrinho = JSON.parse(localStorage.getItem("copagazCarrinho")) || [];
@@ -110,7 +110,7 @@ function calcularSubtotal() {
 }
 
 function calcularEntrega() {
-    return carrinho.length > 0 ? TAXA_ENTREGA : 0;
+    return carrinho.length > 0 ? TAXA_ENTREGA : 20.00;
 }
 
 function calcularTotal() {
