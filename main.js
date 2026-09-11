@@ -1,6 +1,17 @@
-// COPAGAZ - main.js
 
-// Preços iniciais. Depois vamos trocar esta parte pelo Firebase.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
 const produtos = {
     agua: {
         id: "agua",
@@ -16,11 +27,38 @@ const produtos = {
     }
 };
 
+async function carregarProdutosFirebase() {
+    try {
+        const aguaRef = doc(db, "produtos", "agua");
+        const gasRef = doc(db, "produtos", "gas");
+
+        const [aguaSnap, gasSnap] = await Promise.all([
+            getDoc(aguaRef),
+            getDoc(gasRef)
+        ]);
+
+        if (aguaSnap.exists()) {
+            atualizarProduto("agua", aguaSnap.data(), false);
+        }
+
+        if (gasSnap.exists()) {
+            atualizarProduto("gas", gasSnap.data(), false);
+        }
+
+        atualizarInterface();
+
+        console.log("Produtos carregados do Firebase.");
+    } catch (erro) {
+        console.error("Erro ao carregar produtos:", erro);
+        console.log("Usando os preços padrão.");
+    }
+}
+
 let tipoPedido = localStorage.getItem("copagazTipoPedido") || "retirada";
 let carrinho = JSON.parse(localStorage.getItem("copagazCarrinho")) || [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    carregarProdutosLocais();
+    carregarProdutosFirebase();
     inicializarCarrinho();
 
     const botoes = document.querySelectorAll(".ADDcarrinho button");

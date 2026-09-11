@@ -1,4 +1,75 @@
-// COPAGAZ - adm.js
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+const btnLogin = document.getElementById("btn-login");
+
+btnLogin?.addEventListener("click", async () => {
+
+    const email = document.getElementById("admin-email").value.trim();
+    const senha = document.getElementById("admin-senha").value;
+
+    const erro = document.getElementById("login-error");
+
+    try {
+
+        await signInWithEmailAndPassword(auth, email, senha);
+
+        erro.textContent = "";
+
+    } catch (error) {
+
+        console.error(error);
+
+        erro.textContent = "E-mail ou senha incorretos.";
+
+    }
+
+});
+
+
+onAuthStateChanged(auth, (usuario) => {
+
+    const loginArea = document.getElementById("login-area");
+    const painel = document.getElementById("painel-conteudo");
+
+    if (usuario) {
+
+        loginArea.style.display = "none";
+        painel.style.display = "block";
+
+        carregarProdutosFirebaseADM();
+
+    } else {
+
+        loginArea.style.display = "flex";
+        painel.style.display = "none";
+
+    }
+
+});
+
 const camposADM = {
     agua: {
         nomeInput: document.querySelector(".Agua input[type='text']"),

@@ -1,14 +1,11 @@
-// COPAGAZ - Configuração do Firebase
-// Cole aqui os dados fornecidos pelo Firebase Console.
-// NÃO coloque senha do usuário neste arquivo.
+
 
 const firebaseConfig = {
-    apiKey: "COLE_SUA_API_KEY",
-    authDomain: "SEU-PROJETO.firebaseapp.com",
-    projectId: "SEU-PROJETO",
-    storageBucket: "SEU-PROJETO.firebasestorage.app",
-    messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID",
-    appId: "COLE_SEU_APP_ID"
+  apiKey: "AIzaSyC6zHgxuwZ1pTXrq05Df4yo8ZQ331BP5zE",
+  authDomain: "copagaz-26d2d.firebaseapp.com",
+  projectId: "copagaz-26d2d",
+  storageBucket: "copagaz-26d2d.firebasestorage.app",
+  messagingSenderId: "964861184299",
+  appId: "1:964861184299:web:e6f556fd63f17d35711d6e",
+  measurementId: "G-KC4H64QJ3Z"
 };
-
-export default firebaseConfig;
