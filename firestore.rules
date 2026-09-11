@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /produtos/{produtoId} {
+      // Qualquer visitante pode ler os preços para montar o site.
+      allow read: if true;
+
+      // Por segurança, coloque abaixo o UID do usuário administrador
+      // criado no Firebase Authentication.
+      // Exemplo:
+      // allow write: if request.auth != null
+      //   && request.auth.uid == "SEU_UID_DE_ADMIN";
+
+      allow write: if request.auth != null
+        && request.auth.uid == "SEU_UID_DE_ADMIN";
+    }
+  }
+}

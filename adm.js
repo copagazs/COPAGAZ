@@ -1,24 +1,36 @@
 // COPAGAZ - adm.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import firebaseConfig from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 const camposADM = {
     agua: {
         nomeInput: document.querySelector(".Agua input[type='text']"),
-        precoInput: document.querySelector("#precoAgua"),
+        retiradaInput: document.querySelector("#retiradaAgua"),
+        entregaInput: document.querySelector("#entregaAgua"),
         nomeAtual: document.querySelector("#nome-atual-agua"),
-        precoAtual: document.querySelector("#preco-atual-agua"),
+        retiradaAtual: document.querySelector("#retirada-atual-agua"),
+        entregaAtual: document.querySelector("#entrega-atual-agua"),
         botao: document.querySelector(".Agua .Salvar button")
     },
     gas: {
         nomeInput: document.querySelector(".Gas input[type='text']"),
-        precoInput: document.querySelector("#precoGas"),
+        retiradaInput: document.querySelector("#retiradaGas"),
+        entregaInput: document.querySelector("#entregaGas"),
         nomeAtual: document.querySelector("#nome-atual-gas"),
-        precoAtual: document.querySelector("#preco-atual-gas"),
+        retiradaAtual: document.querySelector("#retirada-atual-gas"),
+        entregaAtual: document.querySelector("#entrega-atual-gas"),
         botao: document.querySelector(".Gas .Salvar button")
     }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
     configurarLogin();
-    carregarProdutosLocaisADM();
     configurarBotoesADM();
 });
 
@@ -28,71 +40,138 @@ function configurarLogin() {
     const painelConteudo = document.getElementById("painel-conteudo");
     const errorMsg = document.getElementById("login-error");
 
-    btnLogin?.addEventListener("click", () => {
-        const email = document.getElementById("admin-email").value;
+    btnLogin?.addEventListener("click", async () => {
+        errorMsg.textContent = "";
+        const email = document.getElementById("admin-email").value.trim();
         const senha = document.getElementById("admin-senha").value;
 
-        if (email === "admin@copagaz.com" && senha === "123456") {
-            loginArea.style.display = "none";
-            painelConteudo.style.display = "block";
-        } else {
-            errorMsg.textContent = "E-mail ou senha incorretos!";
+        if (!email || !senha) {
+            errorMsg.textContent = "Digite o e-mail e a senha.";
+            return;
+        }
+
+        btnLogin.disabled = true;
+        btnLogin.textContent = "Entrando...";
+
+        try {
+            await signInWithEmailAndPassword(auth, email, senha);
+        } catch (erro) {
+            console.error(erro);
+            errorMsg.textContent = mensagemErroLogin(erro.code);
+        } finally {
+            btnLogin.disabled = false;
+            btnLogin.textContent = "Entrar";
         }
     });
+
+    onAuthStateChanged(auth, async (usuario) => {
+        if (usuario) {
+            loginArea.style.display = "none";
+            painelConteudo.style.display = "block";
+            await carregarProdutosFirebase();
+        } else {
+            loginArea.style.display = "flex";
+            painelConteudo.style.display = "none";
+        }
+    });
+}
+
+function mensagemErroLogin(codigo) {
+    if (codigo === "auth/invalid-credential") return "E-mail ou senha incorretos.";
+    if (codigo === "auth/user-not-found") return "Usuário não encontrado.";
+    if (codigo === "auth/wrong-password") return "E-mail ou senha incorretos.";
+    if (codigo === "auth/too-many-requests") return "Muitas tentativas. Tente novamente mais tarde.";
+    return "Não foi possível entrar. Confira seus dados.";
 }
 
 function configurarBotoesADM() {
     Object.entries(camposADM).forEach(([id, campos]) => {
-        if (!campos.botao) return;
-
-        campos.botao.addEventListener("click", () => {
-            salvarProdutoLocal(id);
-        });
+        campos.botao?.addEventListener("click", () => salvarProdutoFirebase(id));
     });
 }
 
-function salvarProdutoLocal(id) {
+async function carregarProdutosFirebase() {
+    try {
+        for (const id of Object.keys(camposADM)) {
+            const snap = await getDoc(doc(db, "produtos", id));
+            if (!snap.exists()) continue;
+
+            const produto = snap.data();
+            const campos = camposADM[id];
+
+            if (produto.nome) campos.nomeAtual.textContent = produto.nome;
+            if (produto.retirada !== undefined) campos.retiradaAtual.textContent = formatarMoeda(produto.retirada);
+            if (produto.entrega !== undefined) campos.entregaAtual.textContent = formatarMoeda(produto.entrega);
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar produtos:", erro);
+        document.getElementById("login-error").textContent = "Não foi possível carregar os produtos.";
+    }
+}
+
+async function salvarProdutoFirebase(id) {
     const campos = camposADM[id];
-    if (!campos) return;
+    if (!campos || !auth.currentUser) return;
 
-    const produtosADM = JSON.parse(localStorage.getItem("copagazProdutos")) || {};
+    const nome = campos.nomeInput.value.trim();
+    const retiradaTexto = campos.retiradaInput.value.trim();
+    const entregaTexto = campos.entregaInput.value.trim();
 
-    const novoNome = campos.nomeInput.value.trim();
-    const novoPreco = campos.precoInput.value !== "" ? Number(campos.precoInput.value) : null;
+    const dados = {};
 
-    if (!novoNome && novoPreco === null) {
+    if (nome) dados.nome = nome;
+
+    if (retiradaTexto !== "") {
+        const valor = Number(retiradaTexto);
+        if (!Number.isFinite(valor) || valor < 0) {
+            alert("Digite um valor válido para a retirada.");
+            return;
+        }
+        dados.retirada = valor;
+    }
+
+    if (entregaTexto !== "") {
+        const valor = Number(entregaTexto);
+        if (!Number.isFinite(valor) || valor < 0) {
+            alert("Digite um valor válido para a entrega.");
+            return;
+        }
+        dados.entrega = valor;
+    }
+
+    if (!Object.keys(dados).length) {
         alert("Preencha ao menos um campo para alterar.");
         return;
     }
 
-    const produtoAtual = produtosADM[id] || { nome: id === "agua" ? "Água Mineral" : "Gás de cozinha", preco: 0 };
+    try {
+        campos.botao.disabled = true;
+        campos.botao.textContent = "SALVANDO...";
 
-    if (novoNome) produtoAtual.nome = novoNome;
-    if (novoPreco !== null && novoPreco >= 0) produtoAtual.preco = novoPreco;
+        await setDoc(doc(db, "produtos", id), dados, { merge: true });
 
-    produtosADM[id] = produtoAtual;
+        alert("Alterações salvas no Firebase com sucesso!");
+        campos.nomeInput.value = "";
+        campos.retiradaInput.value = "";
+        campos.entregaInput.value = "";
 
-    localStorage.setItem("copagazProdutos", JSON.stringify(produtosADM));
-
-    alert("Alteração salva localmente com sucesso!");
-    campos.nomeInput.value = "";
-    campos.precoInput.value = "";
-    carregarProdutosLocaisADM();
+        await carregarProdutosFirebase();
+    } catch (erro) {
+        console.error(erro);
+        alert("Não foi possível salvar. Verifique as regras do Firestore.");
+    } finally {
+        campos.botao.disabled = false;
+        campos.botao.textContent = "SALVAR ALTERAÇÕES";
+    }
 }
 
-function carregarProdutosLocaisADM() {
-    const dados = JSON.parse(localStorage.getItem("copagazProdutos")) || {};
-
-    Object.entries(dados).forEach(([id, produto]) => {
-        const campos = camposADM[id];
-        if (!campos) return;
-
-        if (campos.nomeAtual && produto.nome) campos.nomeAtual.textContent = produto.nome;
-        if (campos.precoAtual && produto.preco !== undefined) {
-            campos.precoAtual.textContent = Number(produto.produto ? produto.produto : produto.preco).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL"
-            });
-        }
-    });
+function formatarMoeda(valor) {
+    return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
+
+// Permite usar Ctrl+Enter no formulário como atalho.
+document.addEventListener("keydown", event => {
+    if (event.ctrlKey && event.key === "Enter") {
+        document.querySelector(".painel .Salvar button")?.click();
+    }
+});
