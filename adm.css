@@ -1,120 +1,87 @@
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-:root {
-    --azul: #062844;
-    --azul2: #0b3b63;
-    --laranja: #ff5a00;
-    --fundo: #f4f7f9;
-    --borda: #dce6ec;
-    --texto: #172b3a;
-    --suave: #6b7b88;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
+    background-color: #f4f4f9;
+    color: #333;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--fundo);
-    color: var(--texto);
 }
 
 /* LOGIN */
-
 .login-area {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 45px 20px;
+    padding: 40px 20px;
 }
 
 .login-box {
-    width: min(100%, 390px);
+    background: white;
     padding: 30px;
-    background: #fff;
-    border: 1px solid var(--borda);
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(6,40,68,.09);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
     text-align: center;
 }
 
 .login-logo img {
-    width: 68px;
-    margin-bottom: 8px;
+    width: 80px;
+    margin-bottom: 10px;
 }
 
 .login-box h1 {
-    color: var(--azul);
-    font-size: 1.45rem;
-}
-
-.login-box > p {
-    margin-top: 4px;
-    color: var(--suave);
-    font-size: .85rem;
+    color: #022047;
+    margin-bottom: 5px;
 }
 
 .login-field {
-    margin-top: 17px;
     text-align: left;
+    margin-top: 15px;
 }
 
 .login-field label {
     display: block;
-    margin-bottom: 6px;
-    color: var(--azul);
-    font-size: .78rem;
-    font-weight: 800;
+    margin-bottom: 5px;
+    font-weight: 600;
 }
 
 .login-field input {
     width: 100%;
-    padding: 11px 12px;
-    border: 1px solid var(--borda);
-    border-radius: 9px;
-    outline: none;
-}
-
-.login-field input:focus {
-    border-color: var(--azul2);
-    box-shadow: 0 0 0 3px rgba(11,59,99,.08);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
 .btn-login {
     width: 100%;
-    min-height: 44px;
+    padding: 12px;
+    background-color: #c22400;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
     margin-top: 20px;
-    border: 0;
-    border-radius: 9px;
-    background: var(--laranja);
-    color: #fff;
-    font-weight: 800;
     cursor: pointer;
 }
 
 .login-error {
+    color: red;
+    font-size: 0.9rem;
     margin-top: 10px;
-    color: #c22400;
-    font-size: .78rem;
 }
 
-/* HEADER */
-
+/* HEADER ADM */
 .header {
-    background: var(--azul);
-    color: #fff;
-    padding: 0 5%;
-    box-shadow: 0 3px 12px rgba(0,0,0,.10);
-}
-
-.header {
-    min-height: 68px;
+    background-color: #022047;
+    color: white;
+    padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -123,157 +90,108 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
 }
 
 .logo img {
-    width: 50px;
-}
-
-.logo-text h1 {
-    font-size: 1.15rem;
-    letter-spacing: .07em;
+    height: 40px;
 }
 
 nav ul {
     display: flex;
     list-style: none;
-    gap: 6px;
+    gap: 15px;
 }
 
 nav a {
-    display: block;
-    padding: 8px 11px;
-    border-radius: 8px;
-    color: #fff;
+    color: white;
     text-decoration: none;
-    font-size: .8rem;
-    font-weight: 700;
+    font-weight: bold;
 }
 
-nav a:hover {
-    background: rgba(255,255,255,.08);
-}
-
-/* PAINEL */
-
+/* PAINEL PRODUTOS */
 .painel {
-    width: min(1050px, calc(100% - 30px));
-    margin: 35px auto;
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
-.painel > h1 {
+.painel h1 {
+    color: #022047;
     margin-bottom: 20px;
-    color: var(--azul);
-    font-size: 1.5rem;
     text-align: center;
 }
 
 .produtos-adm-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
 .card-adm {
-    padding: 22px;
-    background: #fff;
-    border: 1px solid var(--borda);
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(6,40,68,.07);
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+    min-width: 300px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .card-adm h2 {
-    margin-bottom: 17px;
-    color: var(--azul);
-    font-size: 1rem;
+    color: #c22400;
+    margin-bottom: 15px;
 }
 
 .campo-adm {
-    margin-bottom: 13px;
+    margin-bottom: 15px;
 }
 
 .campo-adm label {
     display: block;
-    margin-bottom: 5px;
-    color: var(--suave);
-    font-size: .69rem;
-    font-weight: 800;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #666;
 }
 
 .valor-atual {
-    margin-bottom: 6px;
-    color: var(--azul);
-    font-size: .86rem;
-    font-weight: 800;
+    font-weight: bold;
+    color: #022047;
+    margin-bottom: 5px;
 }
 
 .card-adm input {
     width: 100%;
-    padding: 10px 11px;
-    border: 1px solid var(--borda);
-    border-radius: 8px;
-    outline: none;
-}
-
-.card-adm input:focus {
-    border-color: var(--azul2);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
 .card-adm img {
+    height: 100px;
     display: block;
-    height: 90px;
-    max-width: 100%;
-    object-fit: contain;
-    margin: 10px auto 15px;
+    margin: 15px auto;
 }
 
 .Salvar button {
     width: 100%;
-    min-height: 43px;
-    border: 0;
-    border-radius: 9px;
-    background: var(--azul);
-    color: #fff;
-    font-size: .75rem;
-    font-weight: 800;
+    padding: 12px;
+    background-color: #022047;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
 }
 
 .Salvar button:hover {
-    background: var(--azul2);
+    background-color: #01142e;
 }
 
 footer {
     margin-top: auto;
-    padding: 14px;
-    background: var(--azul);
-    color: #d7e1e8;
+    background-color: #022047;
+    color: white;
     text-align: center;
-    font-size: .72rem;
-    border-top: 3px solid var(--laranja);
-}
-
-@media (max-width: 700px) {
-    .header {
-        padding: 8px 14px;
-    }
-
-    .header nav a {
-        padding: 7px 8px;
-        font-size: .72rem;
-    }
-
-    .produtos-adm-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .painel {
-        width: calc(100% - 20px);
-        margin: 22px auto;
-    }
-
-    .card-adm {
-        padding: 18px;
-    }
+    padding: 15px;
 }

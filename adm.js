@@ -1,22 +1,17 @@
 // COPAGAZ - adm.js
-
 const camposADM = {
     agua: {
         nomeInput: document.querySelector(".Agua input[type='text']"),
-        retiradaInput: document.querySelector("#precoAguaRetirada"),
-        entregaInput: document.querySelector("#precoAguaEntrega"),
+        precoInput: document.querySelector("#precoAgua"),
         nomeAtual: document.querySelector("#nome-atual-agua"),
-        retiradaAtual: document.querySelector("#preco-atual-agua-retirada"),
-        entregaAtual: document.querySelector("#preco-atual-agua-entrega"),
+        precoAtual: document.querySelector("#preco-atual-agua"),
         botao: document.querySelector(".Agua .Salvar button")
     },
     gas: {
         nomeInput: document.querySelector(".Gas input[type='text']"),
-        retiradaInput: document.querySelector("#precoGasRetirada"),
-        entregaInput: document.querySelector("#precoGasEntrega"),
+        precoInput: document.querySelector("#precoGas"),
         nomeAtual: document.querySelector("#nome-atual-gas"),
-        retiradaAtual: document.querySelector("#preco-atual-gas-retirada"),
-        entregaAtual: document.querySelector("#preco-atual-gas-entrega"),
+        precoAtual: document.querySelector("#preco-atual-gas"),
         botao: document.querySelector(".Gas .Salvar button")
     }
 };
@@ -48,7 +43,11 @@ function configurarLogin() {
 
 function configurarBotoesADM() {
     Object.entries(camposADM).forEach(([id, campos]) => {
-        campos.botao?.addEventListener("click", () => salvarProdutoLocal(id));
+        if (!campos.botao) return;
+
+        campos.botao.addEventListener("click", () => {
+            salvarProdutoLocal(id);
+        });
     });
 }
 
@@ -59,47 +58,25 @@ function salvarProdutoLocal(id) {
     const produtosADM = JSON.parse(localStorage.getItem("copagazProdutos")) || {};
 
     const novoNome = campos.nomeInput.value.trim();
-    const novaRetirada = campos.retiradaInput.value !== ""
-        ? Number(campos.retiradaInput.value)
-        : null;
-    const novaEntrega = campos.entregaInput.value !== ""
-        ? Number(campos.entregaInput.value)
-        : null;
+    const novoPreco = campos.precoInput.value !== "" ? Number(campos.precoInput.value) : null;
 
-    if (!novoNome && novaRetirada === null && novaEntrega === null) {
+    if (!novoNome && novoPreco === null) {
         alert("Preencha ao menos um campo para alterar.");
         return;
     }
 
-    const padrao = id === "agua"
-        ? { nome: "Água Mineral", retirada: 12.00, entrega: 20.00 }
-        : { nome: "Gás de cozinha", retirada: 105.00, entrega: 120.00 };
-
-    const produtoAtual = produtosADM[id] || { ...padrao };
+    const produtoAtual = produtosADM[id] || { nome: id === "agua" ? "Água Mineral" : "Gás de cozinha", preco: 0 };
 
     if (novoNome) produtoAtual.nome = novoNome;
-
-    if (novaRetirada !== null && novaRetirada >= 0) {
-        produtoAtual.retirada = novaRetirada;
-    }
-
-    if (novaEntrega !== null && novaEntrega >= 0) {
-        produtoAtual.entrega = novaEntrega;
-    }
-
-    // Mantém compatibilidade com versões antigas.
-    produtoAtual.preco = produtoAtual.retirada;
+    if (novoPreco !== null && novoPreco >= 0) produtoAtual.preco = novoPreco;
 
     produtosADM[id] = produtoAtual;
 
     localStorage.setItem("copagazProdutos", JSON.stringify(produtosADM));
 
     alert("Alteração salva localmente com sucesso!");
-
     campos.nomeInput.value = "";
-    campos.retiradaInput.value = "";
-    campos.entregaInput.value = "";
-
+    campos.precoInput.value = "";
     carregarProdutosLocaisADM();
 }
 
@@ -110,26 +87,12 @@ function carregarProdutosLocaisADM() {
         const campos = camposADM[id];
         if (!campos) return;
 
-        const retirada = produto.retirada ?? produto.preco;
-        const entrega = produto.entrega ?? produto.preco;
-
-        if (campos.nomeAtual && produto.nome) {
-            campos.nomeAtual.textContent = produto.nome;
+        if (campos.nomeAtual && produto.nome) campos.nomeAtual.textContent = produto.nome;
+        if (campos.precoAtual && produto.preco !== undefined) {
+            campos.precoAtual.textContent = Number(produto.produto ? produto.produto : produto.preco).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            });
         }
-
-        if (campos.retiradaAtual && retirada !== undefined) {
-            campos.retiradaAtual.textContent = formatarMoeda(retirada);
-        }
-
-        if (campos.entregaAtual && entrega !== undefined) {
-            campos.entregaAtual.textContent = formatarMoeda(entrega);
-        }
-    });
-}
-
-function formatarMoeda(valor) {
-    return Number(valor).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
     });
 }
