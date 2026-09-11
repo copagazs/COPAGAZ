@@ -1,6 +1,5 @@
-
-
-const firebaseConfig = {
+// Configuração do Firebase
+export const firebaseConfig = {
   apiKey: "AIzaSyC6zHgxuwZ1pTXrq05Df4yo8ZQ331BP5zE",
   authDomain: "copagaz-26d2d.firebaseapp.com",
   projectId: "copagaz-26d2d",

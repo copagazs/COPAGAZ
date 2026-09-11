@@ -61,9 +61,13 @@
                 </div>
 
                 <div class="campo-adm">
-                    <label>PREÇO ATUAL:</label>
-                    <div class="valor-atual" id="preco-atual-agua">R$ 0,00</div>
-                    <input type="number" step="0.01" placeholder="DIGITE UM PREÇO NOVO" id="precoAgua">
+                    <label>PREÇO DE RETIRADA ATUAL:</label>
+                    <div class="valor-atual" id="retirada-atual-agua">R$ 12,00</div>
+                    <input type="number" step="0.01" min="0" placeholder="NOVO PREÇO DE RETIRADA" id="retiradaAgua">
+
+                    <label>PREÇO DE ENTREGA ATUAL:</label>
+                    <div class="valor-atual" id="entrega-atual-agua">R$ 20,00</div>
+                    <input type="number" step="0.01" min="0" placeholder="NOVO PREÇO DE ENTREGA" id="entregaAgua">
                 </div>
 
                 <img src="img/3.png" alt="Água Mineral">
@@ -83,9 +87,13 @@
                 </div>
 
                 <div class="campo-adm">
-                    <label>PREÇO ATUAL:</label>
-                    <div class="valor-atual" id="preco-atual-gas">R$ 0,00</div>
-                    <input type="number" step="0.01" placeholder="DIGITE UM PREÇO NOVO" id="precoGas">
+                    <label>PREÇO DE RETIRADA ATUAL:</label>
+                    <div class="valor-atual" id="retirada-atual-gas">R$ 105,00</div>
+                    <input type="number" step="0.01" min="0" placeholder="NOVO PREÇO DE RETIRADA" id="retiradaGas">
+
+                    <label>PREÇO DE ENTREGA ATUAL:</label>
+                    <div class="valor-atual" id="entrega-atual-gas">R$ 120,00</div>
+                    <input type="number" step="0.01" min="0" placeholder="NOVO PREÇO DE ENTREGA" id="entregaGas">
                 </div>
 
                 <img src="img/4.png" alt="Gás de cozinha">
@@ -96,6 +104,8 @@
             </div>
 
         </div>
+
+        <button type="button" id="btn-sair" class="btn-login" style="margin: 30px auto; display: block;">Sair do ADM</button>
     </div>
 
     <footer>

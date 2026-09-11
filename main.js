@@ -8,8 +8,15 @@ import {
 
 import { firebaseConfig } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let db = null;
+
+// Melissa: se o Firebase der erro, o carrinho continua funcionando.
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+} catch (erro) {
+    console.warn("Firebase indisponível. O site continuará funcionando com os preços padrão.", erro);
+}
 
 
 const produtos = {
@@ -28,6 +35,8 @@ const produtos = {
 };
 
 async function carregarProdutosFirebase() {
+    if (!db) return;
+
     try {
         const aguaRef = doc(db, "produtos", "agua");
         const gasRef = doc(db, "produtos", "gas");
@@ -57,8 +66,9 @@ async function carregarProdutosFirebase() {
 let tipoPedido = localStorage.getItem("copagazTipoPedido") || "retirada";
 let carrinho = JSON.parse(localStorage.getItem("copagazCarrinho")) || [];
 
-document.addEventListener("DOMContentLoaded", () => {
-    carregarProdutosFirebase();
+document.addEventListener("DOMContentLoaded", async () => {
+    // Melissa: primeiro monta o carrinho; depois tenta buscar os preços no Firebase.
+    carregarProdutosLocais();
     inicializarCarrinho();
 
     const botoes = document.querySelectorAll(".ADDcarrinho button");
@@ -69,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    atualizarInterface();
+
+    await carregarProdutosFirebase();
     atualizarInterface();
 
     const btnInstalar = document.getElementById("btn-instalar");

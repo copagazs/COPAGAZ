@@ -1,169 +1,233 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-
 import {
     getAuth,
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
 import {
     getFirestore,
     doc,
     getDoc,
     setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 import { firebaseConfig } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
+// Melissa: o ADM usa o Firebase de verdade, sem senha fixa no código.
+let auth = null;
+let db = null;
 
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-
-const btnLogin = document.getElementById("btn-login");
-
-btnLogin?.addEventListener("click", async () => {
-
-    const email = document.getElementById("admin-email").value.trim();
-    const senha = document.getElementById("admin-senha").value;
-
-    const erro = document.getElementById("login-error");
-
-    try {
-
-        await signInWithEmailAndPassword(auth, email, senha);
-
-        erro.textContent = "";
-
-    } catch (error) {
-
-        console.error(error);
-
-        erro.textContent = "E-mail ou senha incorretos.";
-
-    }
-
-});
-
-
-onAuthStateChanged(auth, (usuario) => {
-
-    const loginArea = document.getElementById("login-area");
-    const painel = document.getElementById("painel-conteudo");
-
-    if (usuario) {
-
-        loginArea.style.display = "none";
-        painel.style.display = "block";
-
-        carregarProdutosFirebaseADM();
-
-    } else {
-
-        loginArea.style.display = "flex";
-        painel.style.display = "none";
-
-    }
-
-});
+try {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} catch (erro) {
+    console.error("Erro ao iniciar Firebase:", erro);
+    mostrarErro("Não foi possível conectar ao Firebase. Confira a configuração.");
+}
 
 const camposADM = {
     agua: {
         nomeInput: document.querySelector(".Agua input[type='text']"),
-        precoInput: document.querySelector("#precoAgua"),
+        retiradaInput: document.querySelector("#retiradaAgua"),
+        entregaInput: document.querySelector("#entregaAgua"),
         nomeAtual: document.querySelector("#nome-atual-agua"),
-        precoAtual: document.querySelector("#preco-atual-agua"),
+        retiradaAtual: document.querySelector("#retirada-atual-agua"),
+        entregaAtual: document.querySelector("#entrega-atual-agua"),
         botao: document.querySelector(".Agua .Salvar button")
     },
     gas: {
         nomeInput: document.querySelector(".Gas input[type='text']"),
-        precoInput: document.querySelector("#precoGas"),
+        retiradaInput: document.querySelector("#retiradaGas"),
+        entregaInput: document.querySelector("#entregaGas"),
         nomeAtual: document.querySelector("#nome-atual-gas"),
-        precoAtual: document.querySelector("#preco-atual-gas"),
+        retiradaAtual: document.querySelector("#retirada-atual-gas"),
+        entregaAtual: document.querySelector("#entrega-atual-gas"),
         botao: document.querySelector(".Gas .Salvar button")
     }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
     configurarLogin();
-    carregarProdutosLocaisADM();
     configurarBotoesADM();
+
+    if (auth) {
+        onAuthStateChanged(auth, (usuario) => {
+            const loginArea = document.getElementById("login-area");
+            const painel = document.getElementById("painel-conteudo");
+
+            if (usuario) {
+                loginArea.style.display = "flex";
+                loginArea.style.display = "none";
+                painel.style.display = "block";
+                carregarProdutosFirebaseADM();
+            } else {
+                loginArea.style.display = "flex";
+                painel.style.display = "none";
+            }
+        });
+    }
 });
+
+function mostrarErro(texto) {
+    const erro = document.getElementById("login-error");
+    if (erro) erro.textContent = texto;
+}
 
 function configurarLogin() {
     const btnLogin = document.getElementById("btn-login");
-    const loginArea = document.getElementById("login-area");
-    const painelConteudo = document.getElementById("painel-conteudo");
-    const errorMsg = document.getElementById("login-error");
 
-    btnLogin?.addEventListener("click", () => {
-        const email = document.getElementById("admin-email").value;
-        const senha = document.getElementById("admin-senha").value;
-
-        if (email === "admin@copagaz.com" && senha === "123456") {
-            loginArea.style.display = "none";
-            painelConteudo.style.display = "block";
-        } else {
-            errorMsg.textContent = "E-mail ou senha incorretos!";
+    btnLogin?.addEventListener("click", async () => {
+        if (!auth) {
+            mostrarErro("Firebase não está conectado.");
+            return;
         }
+
+        const email = document.getElementById("admin-email")?.value.trim();
+        const senha = document.getElementById("admin-senha")?.value;
+
+        if (!email || !senha) {
+            mostrarErro("Digite seu e-mail e sua senha.");
+            return;
+        }
+
+        btnLogin.disabled = true;
+        btnLogin.textContent = "Entrando...";
+
+        try {
+            await signInWithEmailAndPassword(auth, email, senha);
+            mostrarErro("");
+        } catch (error) {
+            console.error(error);
+
+            const mensagens = {
+                "auth/invalid-credential": "E-mail ou senha incorretos.",
+                "auth/invalid-email": "Digite um e-mail válido.",
+                "auth/user-not-found": "Usuário não encontrado.",
+                "auth/wrong-password": "Senha incorreta.",
+                "auth/too-many-requests": "Muitas tentativas. Tente novamente mais tarde."
+            };
+
+            mostrarErro(mensagens[error.code] || "Não foi possível entrar. Verifique o Firebase.");
+        } finally {
+            btnLogin.disabled = false;
+            btnLogin.textContent = "Entrar";
+        }
+    });
+
+    document.getElementById("admin-senha")?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") btnLogin?.click();
     });
 }
 
 function configurarBotoesADM() {
     Object.entries(camposADM).forEach(([id, campos]) => {
-        if (!campos.botao) return;
+        campos.botao?.addEventListener("click", () => salvarProdutoFirebase(id));
+    });
 
-        campos.botao.addEventListener("click", () => {
-            salvarProdutoLocal(id);
-        });
+    document.getElementById("btn-sair")?.addEventListener("click", () => {
+        signOut(auth);
     });
 }
 
-function salvarProdutoLocal(id) {
+async function carregarProdutosFirebaseADM() {
+    if (!db) return;
+
+    try {
+        for (const id of ["agua", "gas"]) {
+            const snap = await getDoc(doc(db, "produtos", id));
+
+            if (snap.exists()) {
+                mostrarProdutoADM(id, snap.data());
+            }
+        }
+    } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+        mostrarErro("Entrei no ADM, mas não consegui carregar os produtos.");
+    }
+}
+
+function mostrarProdutoADM(id, produto) {
     const campos = camposADM[id];
     if (!campos) return;
 
-    const produtosADM = JSON.parse(localStorage.getItem("copagazProdutos")) || {};
+    if (campos.nomeAtual) {
+        campos.nomeAtual.textContent = produto.nome || (id === "agua" ? "Água Mineral" : "Gás de cozinha");
+    }
 
-    const novoNome = campos.nomeInput.value.trim();
-    const novoPreco = campos.precoInput.value !== "" ? Number(campos.precoInput.value) : null;
+    if (campos.retiradaAtual) {
+        campos.retiradaAtual.textContent = formatarMoeda(produto.retirada);
+    }
 
-    if (!novoNome && novoPreco === null) {
-        alert("Preencha ao menos um campo para alterar.");
+    if (campos.entregaAtual) {
+        campos.entregaAtual.textContent = formatarMoeda(produto.entrega);
+    }
+}
+
+async function salvarProdutoFirebase(id) {
+    if (!auth?.currentUser || !db) {
+        alert("Faça login no ADM primeiro.");
         return;
     }
 
-    const produtoAtual = produtosADM[id] || { nome: id === "agua" ? "Água Mineral" : "Gás de cozinha", preco: 0 };
+    const campos = camposADM[id];
+    const nome = campos.nomeInput.value.trim();
+    const retiradaTexto = campos.retiradaInput.value;
+    const entregaTexto = campos.entregaInput.value;
 
-    if (novoNome) produtoAtual.nome = novoNome;
-    if (novoPreco !== null && novoPreco >= 0) produtoAtual.preco = novoPreco;
+    const dados = {};
 
-    produtosADM[id] = produtoAtual;
+    if (nome) dados.nome = nome;
 
-    localStorage.setItem("copagazProdutos", JSON.stringify(produtosADM));
+    if (retiradaTexto !== "") {
+        const retirada = Number(retiradaTexto);
+        if (!Number.isFinite(retirada) || retirada < 0) {
+            alert("Digite um preço de retirada válido.");
+            return;
+        }
+        dados.retirada = retirada;
+    }
 
-    alert("Alteração salva localmente com sucesso!");
-    campos.nomeInput.value = "";
-    campos.precoInput.value = "";
-    carregarProdutosLocaisADM();
+    if (entregaTexto !== "") {
+        const entrega = Number(entregaTexto);
+        if (!Number.isFinite(entrega) || entrega < 0) {
+            alert("Digite um preço de entrega válido.");
+            return;
+        }
+        dados.entrega = entrega;
+    }
+
+    if (Object.keys(dados).length === 0) {
+        alert("Preencha pelo menos um campo para alterar.");
+        return;
+    }
+
+    try {
+        campos.botao.disabled = true;
+        campos.botao.textContent = "SALVANDO...";
+
+        await setDoc(doc(db, "produtos", id), dados, { merge: true });
+
+        const atualizado = await getDoc(doc(db, "produtos", id));
+        if (atualizado.exists()) mostrarProdutoADM(id, atualizado.data());
+
+        campos.nomeInput.value = "";
+        campos.retiradaInput.value = "";
+        campos.entregaInput.value = "";
+
+        alert("Alteração salva no Firebase! O site público usará os novos valores.");
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        alert("Não foi possível salvar. Se o login funcionou, verifique as regras do Firestore.");
+    } finally {
+        campos.botao.disabled = false;
+        campos.botao.textContent = "SALVAR ALTERAÇÕES";
+    }
 }
 
-function carregarProdutosLocaisADM() {
-    const dados = JSON.parse(localStorage.getItem("copagazProdutos")) || {};
-
-    Object.entries(dados).forEach(([id, produto]) => {
-        const campos = camposADM[id];
-        if (!campos) return;
-
-        if (campos.nomeAtual && produto.nome) campos.nomeAtual.textContent = produto.nome;
-        if (campos.precoAtual && produto.preco !== undefined) {
-            campos.precoAtual.textContent = Number(produto.produto ? produto.produto : produto.preco).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL"
-            });
-        }
+function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
     });
 }
