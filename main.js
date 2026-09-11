@@ -1,17 +1,27 @@
 // COPAGAZ - main.js
-const TAXA_ENTREGA = 20.00;
 
+// Preços iniciais. Depois vamos trocar esta parte pelo Firebase.
 const produtos = {
-    agua: { id: "agua", nome: "Água Mineral", preco: 100.00 },
-    gas: { id: "gas", nome: "Gás de cozinha", preco: 120.00 }
+    agua: {
+        id: "agua",
+        nome: "Água Mineral",
+        retirada: 12.00,
+        entrega: 20.00
+    },
+    gas: {
+        id: "gas",
+        nome: "Gás de cozinha",
+        retirada: 105.00,
+        entrega: 120.00
+    }
 };
 
+let tipoPedido = localStorage.getItem("copagazTipoPedido") || "retirada";
 let carrinho = JSON.parse(localStorage.getItem("copagazCarrinho")) || [];
 
 document.addEventListener("DOMContentLoaded", () => {
     carregarProdutosLocais();
     inicializarCarrinho();
-    atualizarInterface();
 
     const botoes = document.querySelectorAll(".ADDcarrinho button");
 
@@ -20,6 +30,20 @@ document.addEventListener("DOMContentLoaded", () => {
             adicionarAoCarrinho(index === 0 ? "agua" : "gas");
         });
     });
+
+    atualizarInterface();
+
+    const btnInstalar = document.getElementById("btn-instalar");
+
+    if (btnInstalar) {
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            installPrompt = event;
+            btnInstalar.hidden = false;
+        });
+
+        btnInstalar.addEventListener("click", instalarAplicativo);
+    }
 });
 
 function carregarProdutosLocais() {
@@ -35,14 +59,52 @@ function inicializarCarrinho() {
     if (!carrinhoElemento) return;
 
     carrinhoElemento.innerHTML = `
-        <h1>CARRINHO</h1>
+        <div class="carrinho-cabecalho">
+            <div>
+                <span class="carrinho-legenda">SEU PEDIDO</span>
+                <h1>CARRINHO</h1>
+            </div>
+            <span class="carrinho-contador" id="carrinho-contador">0 itens</span>
+        </div>
+
+        <div class="tipo-pedido">
+            <span class="tipo-pedido-titulo">Como deseja receber?</span>
+
+            <div class="tipo-opcoes">
+                <label class="tipo-opcao">
+                    <input type="radio" name="tipo-pedido" value="retirada" ${tipoPedido === "retirada" ? "checked" : ""}>
+                    <span>
+                        <strong>Retirada no local</strong>
+                        <small>Preços de retirada</small>
+                    </span>
+                </label>
+
+                <label class="tipo-opcao">
+                    <input type="radio" name="tipo-pedido" value="entrega" ${tipoPedido === "entrega" ? "checked" : ""}>
+                    <span>
+                        <strong>Entrega</strong>
+                        <small>Preços de entrega</small>
+                    </span>
+                </label>
+            </div>
+        </div>
+
         <div id="lista-carrinho"></div>
         <div id="resumo-carrinho"></div>
+
         <div class="acoes-carrinho">
             <button type="button" id="limpar-carrinho">Limpar carrinho</button>
-            <button type="button" id="finalizar-compra">Finalizar compra</button>
+            <button type="button" id="finalizar-compra">Finalizar pedido</button>
         </div>
     `;
+
+    document.querySelectorAll('input[name="tipo-pedido"]').forEach((radio) => {
+        radio.addEventListener("change", () => {
+            tipoPedido = radio.value;
+            localStorage.setItem("copagazTipoPedido", tipoPedido);
+            atualizarCarrinho();
+        });
+    });
 
     document.getElementById("limpar-carrinho")
         ?.addEventListener("click", limparCarrinho);
@@ -54,7 +116,11 @@ function inicializarCarrinho() {
 function adicionarAoCarrinho(id) {
     const produto = produtos[id];
 
-    if (!produto || produto.preco <= 0) {
+    if (!produto) return;
+
+    const preco = obterPrecoProduto(produto);
+
+    if (preco <= 0) {
         alert("O preço deste produto ainda não foi configurado.");
         return;
     }
@@ -67,7 +133,6 @@ function adicionarAoCarrinho(id) {
         carrinho.push({
             id,
             nome: produto.nome,
-            preco: produto.preco,
             quantidade: 1
         });
     }
@@ -102,19 +167,15 @@ function limparCarrinho() {
     atualizarInterface();
 }
 
-function calcularSubtotal() {
-    return carrinho.reduce(
-        (total, item) => total + item.preco * item.quantidade,
-        0
-    );
-}
-
-function calcularEntrega() {
-    return carrinho.length > 0 ? TAXA_ENTREGA : 20.00;
+function obterPrecoProduto(produto) {
+    return tipoPedido === "entrega" ? Number(produto.entrega) : Number(produto.retirada);
 }
 
 function calcularTotal() {
-    return calcularSubtotal() + calcularEntrega();
+    return carrinho.reduce((total, item) => {
+        const produto = produtos[item.id];
+        return total + obterPrecoProduto(produto) * item.quantidade;
+    }, 0);
 }
 
 function atualizarInterface() {
@@ -129,37 +190,66 @@ function atualizarProdutosNaTela() {
     const gasPreco = document.querySelector(".Gas .preco p");
 
     if (aguaNome) aguaNome.textContent = produtos.agua.nome;
-    if (aguaPreco) aguaPreco.textContent = formatarMoeda(produtos.agua.preco);
+    if (aguaPreco) aguaPreco.textContent = formatarMoeda(obterPrecoProduto(produtos.agua));
 
     if (gasNome) gasNome.textContent = produtos.gas.nome;
-    if (gasPreco) gasPreco.textContent = formatarMoeda(produtos.gas.preco);
+    if (gasPreco) gasPreco.textContent = formatarMoeda(obterPrecoProduto(produtos.gas));
+
+    const legendaPreco = document.querySelector(".produtos-preco-legenda");
+    if (legendaPreco) {
+        legendaPreco.textContent = tipoPedido === "entrega"
+            ? "Preços para entrega"
+            : "Preços para retirada no local";
+    }
 }
 
 function atualizarCarrinho() {
     const lista = document.getElementById("lista-carrinho");
     const resumo = document.getElementById("resumo-carrinho");
+    const contador = document.getElementById("carrinho-contador");
 
     if (!lista || !resumo) return;
 
-    if (carrinho.length === 0) {
-        lista.innerHTML = `<p class="carrinho-vazio">Seu carrinho está vazio.</p>`;
-    } else {
-        lista.innerHTML = carrinho.map(item => `
-            <div class="item-carrinho">
-                <div class="item-info">
-                    <h3>${escaparHTML(item.nome)}</h3>
-                    <p>${formatarMoeda(item.preco)} cada</p>
-                </div>
+    if (contador) {
+        const quantidadeTotal = carrinho.reduce((total, item) => total + item.quantidade, 0);
+        contador.textContent = `${quantidadeTotal} ${quantidadeTotal === 1 ? "item" : "itens"}`;
+    }
 
-                <div class="item-controles">
-                    <button type="button" class="btn-remover" data-id="${item.id}">−</button>
-                    <span>${item.quantidade}</span>
-                    <button type="button" class="btn-adicionar" data-id="${item.id}">+</button>
-                    <strong>${formatarMoeda(item.preco * item.quantidade)}</strong>
-                    <button type="button" class="btn-excluir" data-id="${item.id}">Remover</button>
-                </div>
+    if (carrinho.length === 0) {
+        lista.innerHTML = `
+            <div class="carrinho-vazio">
+                <span>🛒</span>
+                <p>Seu carrinho está vazio.</p>
+                <small>Adicione um produto para começar seu pedido.</small>
             </div>
-        `).join("");
+        `;
+    } else {
+        lista.innerHTML = carrinho.map(item => {
+            const produto = produtos[item.id];
+            const preco = obterPrecoProduto(produto);
+            const totalItem = preco * item.quantidade;
+
+            return `
+                <div class="item-carrinho">
+                    <div class="item-info">
+                        <h3>${escaparHTML(item.nome)}</h3>
+                        <p>${formatarMoeda(preco)} por unidade</p>
+                    </div>
+
+                    <div class="item-controles">
+                        <div class="quantidade">
+                            <button type="button" class="btn-remover" data-id="${item.id}" aria-label="Diminuir quantidade">−</button>
+                            <span>${item.quantidade}</span>
+                            <button type="button" class="btn-adicionar" data-id="${item.id}" aria-label="Aumentar quantidade">+</button>
+                        </div>
+
+                        <strong class="item-total">${formatarMoeda(totalItem)}</strong>
+
+                        <button type="button" class="btn-excluir" data-id="${item.id}">Remover</button>
+                    </div>
+                </div>
+            `;
+        }).join("");
 
         lista.querySelectorAll(".btn-remover").forEach(botao => {
             botao.addEventListener("click", () => removerDoCarrinho(botao.dataset.id));
@@ -176,24 +266,16 @@ function atualizarCarrinho() {
         });
     }
 
-    const subtotal = calcularSubtotal();
-    const entrega = calcularEntrega();
     const total = calcularTotal();
 
     resumo.innerHTML = `
-        <div class="linha-total">
-            <span>Subtotal:</span>
-            <strong>${formatarMoeda(subtotal)}</strong>
-        </div>
-        <div class="linha-total">
-            <span>Entrega:</span>
-            <strong>${formatarMoeda(entrega)}</strong>
-        </div>
         <div class="linha-total total-final">
-            <span>Total:</span>
+            <span>Total do pedido</span>
             <strong>${formatarMoeda(total)}</strong>
         </div>
     `;
+
+    atualizarProdutosNaTela();
 }
 
 function salvarCarrinho() {
@@ -206,22 +288,25 @@ function finalizarCompra() {
         return;
     }
 
-    const subtotal = calcularSubtotal();
-    const entrega = calcularEntrega();
     const total = calcularTotal();
+    const modalidade = tipoPedido === "entrega"
+        ? "entrega"
+        : "retirada no local";
 
-    let mensagem = "Olá! Gostaria de fazer um pedido:\n\n";
+    let mensagem = `Olá! Gostaria de fazer um pedido para ${modalidade}:\n\n`;
 
     carrinho.forEach(item => {
-        mensagem += `${item.quantidade}x ${item.nome} - ${formatarMoeda(item.preco * item.quantidade)}\n`;
+        const produto = produtos[item.id];
+        const preco = obterPrecoProduto(produto);
+        const totalItem = preco * item.quantidade;
+
+        mensagem += `${item.quantidade}x ${item.nome} - ${formatarMoeda(totalItem)}\n`;
     });
 
-    mensagem += `\nSubtotal: ${formatarMoeda(subtotal)}`;
-    mensagem += `\nEntrega: ${formatarMoeda(entrega)}`;
     mensagem += `\nTotal: ${formatarMoeda(total)}`;
 
     const numeroWhatsApp = "5542999373062";
-    const url = `https://wa.me/5542999373062?text=${encodeURIComponent(mensagem)}`;
+    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
 
     window.open(url, "_blank");
 }
@@ -246,17 +331,20 @@ function atualizarProduto(id, dados, atualizarCarrinho = true) {
         produtos[id].nome = dados.nome.trim();
     }
 
+    // Compatibilidade com o modelo antigo: preco vira preço de retirada.
     if (Number.isFinite(Number(dados.preco))) {
-        produtos[id].preco = Number(dados.preco);
+        produtos[id].retirada = Number(dados.preco);
+    }
+
+    if (Number.isFinite(Number(dados.retirada))) {
+        produtos[id].retirada = Number(dados.retirada);
+    }
+
+    if (Number.isFinite(Number(dados.entrega))) {
+        produtos[id].entrega = Number(dados.entrega);
     }
 
     if (atualizarCarrinho) {
-        carrinho.forEach(item => {
-            if (item.id === id) {
-                item.nome = produtos[id].nome;
-                item.preco = produtos[id].preco;
-            }
-        });
         salvarCarrinho();
         atualizarInterface();
     }
@@ -264,20 +352,8 @@ function atualizarProduto(id, dados, atualizarCarrinho = true) {
 
 let installPrompt = null;
 
-const btnInstalar = document.getElementById("btn-instalar");
-
-// Quando o navegador permitir a instalação
-window.addEventListener("beforeinstallprompt", (event) => {
-
-    event.preventDefault();
-
-    installPrompt = event;
-
-    btnInstalar.hidden = false;
-});
-
-// Quando clicar em "Baixe o aplicativo"
-btnInstalar.addEventListener("click", async () => {
+async function instalarAplicativo() {
+    const btnInstalar = document.getElementById("btn-instalar");
 
     if (!installPrompt) {
         alert(
@@ -292,16 +368,15 @@ btnInstalar.addEventListener("click", async () => {
 
     if (resultado.outcome === "accepted") {
         console.log("COPAGAZ instalado!");
-    } else {
-        console.log("Instalação cancelada.");
     }
 
-    // Permite que um novo evento de instalação
-    // seja recebido posteriormente.
     installPrompt = null;
-});
 
-// Quando o aplicativo for instalado
+    if (btnInstalar) {
+        btnInstalar.hidden = true;
+    }
+}
+
 window.addEventListener("appinstalled", () => {
     console.log("COPAGAZ instalado!");
 });
